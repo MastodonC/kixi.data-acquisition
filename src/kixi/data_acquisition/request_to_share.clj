@@ -1,6 +1,5 @@
 (ns kixi.data-acquisition.request-to-share
-  (:require [kixi.data-acquisition.datastore :refer :all :as ds]
-            [kixi.data-acquisition.db :refer :all :as db]
+  (:require [kixi.data-acquisition.db :refer :all :as db]
             [kixi.comms :as kc]
             [kixi.comms.schema :as ks]
             [clojure.spec :as s]
