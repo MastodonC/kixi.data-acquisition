@@ -5,7 +5,8 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.9.0-alpha13"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
+                 [org.clojure/data.codec "0.1.0"]
                  [ring/ring-core "1.5.0"]
                  [aero "1.0.0"]
                  [clj-time "0.12.0"]
@@ -22,7 +23,12 @@
                  [org.slf4j/log4j-over-slf4j ~slf4j-version]
                  [org.slf4j/jul-to-slf4j ~slf4j-version]
                  [org.slf4j/jcl-over-slf4j ~slf4j-version]
-                 [kixi/kixi.comms "0.1.4"]]
+                 [kixi/kixi.comms "0.1.16"]
+                 [http-kit "2.1.19"]
+                 [ring-cors "0.1.8"]
+                 [compojure "1.5.1"]
+                 [com.cognitect/transit-clj "0.8.290"]]
+
   :main ^:skip-aot kixi.data-acquisition
   :target-path "target/%s"
   :profiles {:uberjar {:aot [kixi.data-acquisition.bootstrap]

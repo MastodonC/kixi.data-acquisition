@@ -12,19 +12,22 @@
 
 (deftest create-request-to-share-1-0-0-test
   (let [{:keys [comms db]} @system
-        result-fn #(db/select db :request-to-share [:data-acquisition/request-id])
+        result-fn #(db/select db :request-to-share [:kixi.data-acquisition.request-to-share/request-id])
         req-id    (uuid)
         reqr-id   (uuid)
         sch-id    (uuid)
-        reqe-name "foo"
+        reqe-id   (uuid)
+        dst-id    (uuid)
         reqe-msg  "bar"]
-    (kc/send-command! comms
-                      :data-acquisition/create-request-to-share
-                      "1.0.0"
-                      {:data-acquisition/request-id     req-id
-                       :data-acquisition/requester-id   reqr-id
-                       :data-acquisition/schema-id      sch-id
-                       :data-acquisition/requestee-name reqe-name
-                       :data-acquisition/requestee-msg  reqe-msg})
+    (kc/send-command!
+     comms
+     :kixi.data-acquisition.request-to-share/create
+     "1.0.0"
+     {:kixi.data-acquisition.request-to-share/request-id       req-id
+      :kixi.data-acquisition.request-to-share/requester-id     reqr-id
+      :kixi.data-acquisition.request-to-share/schema-id        sch-id
+      :kixi.data-acquisition.request-to-share/recipient-ids    [reqe-id]
+      :kixi.data-acquisition.request-to-share/destination-ids  [dst-id]
+      :kixi.data-acquisition.request-to-share/message          reqe-msg})
     (wait-for-pred #(not-empty (result-fn)))
-    (is (= req-id (:data-acquisition/request-id (first (result-fn)))))))
+    (is (= req-id (:kixi.data-acquisition.request-to-share/request-id (first (result-fn)))) (pr-str db))))
