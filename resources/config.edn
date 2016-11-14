@@ -22,7 +22,7 @@
                              :seconds #profile {:production 60
                                                 :development 60}}}
  :log {:level #profile {:production :info
-                        :development :debug}
+                        :development :info}
        ;; ns-blacklist doesn't work?
        ;; https://github.com/fzakaria/slf4j-timbre/issues/18
        :ns-blacklist #profile {:production []
@@ -32,4 +32,5 @@
  :datastore {:inmemory {}}
  :comms {:host #profile {:production "???"
                          :development "localhost"}
-         :port 2181}}
+         :port 2181}
+ :webserver {:port 60016}}

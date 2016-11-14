@@ -10,7 +10,8 @@
              [metrics :as metrics]]
             [kixi.data-acquisition.db.inmemory :as db-inmemory]
             [kixi.data-acquisition.datastore.inmemory :as ds-inmemory]
-            [kixi.data-acquisition.request-to-share :as rts]))
+            [kixi.data-acquisition.request-to-share :as rts]
+            [kixi.data-acquisition.webserver :as web]))
 
 (defmethod aero/reader 'rand-uuid
   [{:keys [profile] :as opts} tag value]
@@ -40,4 +41,7 @@
      ;;
      :request-to-share (component/using
                         (rts/map->RequestToShare {})
-                        [:comms :db]))))
+                        [:comms :db])
+     :webserver    (component/using
+                    (web/map->WebServer (:webserver config))
+                    [:request-to-share]))))

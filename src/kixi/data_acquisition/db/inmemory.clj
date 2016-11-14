@@ -24,10 +24,12 @@
         (throw (Exception. (str "Row doesn't contain index: " (:index t)))))
       (throw (Exception. (str "Couldn't find table: " table)))))
   (select [this table what]
-    (mapv #(select-keys % what) (get-in @(:data this) [table :rows])))
+    (if what
+      (mapv #(select-keys % what) (get-in @(:data this) [table :rows]))
+      (vec (get-in @(:data this) [table :rows]))))
   (select-where [this table what where]
     (let [r (select this table what)]
-      (reduce (fn [a [k v]] (filter a #(= (get % k) v))) r where)))
+      (vec (reduce (fn [a [k v]] (filter #(= (get % k) v) a)) r where))))
   component/Lifecycle
   (start [component]
     (log/info "Starting Database - In Memory")
