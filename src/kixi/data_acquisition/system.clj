@@ -9,6 +9,7 @@
              [logstash :as logstash]
              [metrics :as metrics]]
             [kixi.data-acquisition.db.inmemory :as db-inmemory]
+            [kixi.data-acquisition.db.cassandra :as db-cassandra]
             [kixi.data-acquisition.datastore.inmemory :as ds-inmemory]
             [kixi.data-acquisition.request-to-share :as rts]
             [kixi.data-acquisition.webserver :as web]))
@@ -33,7 +34,9 @@
 
     (component/system-map
      :db      (case (first (keys (:db config)))
-                :inmemory (db-inmemory/map->DbInMemory {}))
+                :inmemory (db-inmemory/map->DbInMemory {})
+                :cassandra (db-cassandra/map->DbCassandra (merge {:profile profile}
+                                                                 (get-in config [:db :cassandra]))))
      :datastore (case (first (keys (:datastore config)))
                   :inmemory (ds-inmemory/map->DatastoreInMemory {}))
      :comms (kafka/map->Kafka (:comms config))

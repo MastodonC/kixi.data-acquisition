@@ -7,7 +7,6 @@
             [kixi.comms :as kc]))
 
 (def system (atom nil))
-(defn uuid [] (str (java.util.UUID/randomUUID)))
 
 (use-fixtures :once (partial cycle-system-fixture system))
 
@@ -38,7 +37,9 @@
                    (transit-decode)
                    (first))]
       (is (= 200 (:status result)))
-      (is (= req-id (:kixi.data-acquisition.request-to-share/request-id body))))
+      (is (= req-id (:kixi.data-acquisition.request-to-share/request-id body)) (pr-str (-> result
+                                                                                           :body
+                                                                                           (slurp)))))
     (let [result @(http/get (wst/endpoint 60016 "request" "requester" reqr-id))
           body (-> result
                    :body

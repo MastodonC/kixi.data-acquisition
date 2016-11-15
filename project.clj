@@ -27,7 +27,11 @@
                  [http-kit "2.1.19"]
                  [ring-cors "0.1.8"]
                  [compojure "1.5.1"]
-                 [com.cognitect/transit-clj "0.8.290"]]
+                 [com.cognitect/transit-clj "0.8.290"]
+                 [cc.qbits/alia-all "3.2.0" :exclusions [cc.qbits/hayt org.clojure/clojure]]
+                 [cc.qbits/hayt "3.0.1"]
+                 [joplin.core "0.3.9"]
+                 [joplin.cassandra "0.3.9"]]
 
   :main ^:skip-aot kixi.data-acquisition
   :target-path "target/%s"
