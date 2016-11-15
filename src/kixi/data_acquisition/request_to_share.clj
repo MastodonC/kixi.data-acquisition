@@ -3,6 +3,9 @@
             [kixi.comms :as kc]
             [kixi.comms.time :as kt]
             [kixi.comms.schema :as ks]
+            [clj-time.core :as t]
+            [clj-time.format :as tf]
+            [clj-time.coerce :as tc]
             [clojure.spec :as s]
             [com.stuartsierra.component :as component]
             [taoensso.timbre :as log]))
@@ -27,7 +30,7 @@
                 ::message]
           :opt [::created-at]))
 
-(def request-to-share-table :request-to-share)
+(def request-to-share-tables [:data-requests :data-requests-by-requester])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Functions
@@ -38,6 +41,42 @@
     {:kixi.comms.event/payload data
      :kixi.comms.event/version v
      :kixi.comms.event/key k}))
+
+(defn db-time
+  "getting timestamp of now but in db format"
+  ([]
+   (tf/unparse (tf/formatters :date-time) (t/now)))
+  ([time]
+   (tf/unparse (tf/formatters :date-time) time)))
+
+(defn parse-iso-time
+  [time-str]
+  (tf/parse (tf/formatters :basic-date-time) time-str))
+
+(defn unparse-iso-time
+  [time]
+  (tf/unparse (tf/formatters :basic-date-time) (tc/from-date time)))
+
+(defn clj->db
+  [payload]
+  (-> payload
+      (update ::request-id      #(java.util.UUID/fromString %))
+      (update ::requester-id    #(java.util.UUID/fromString %))
+      (update ::schema-id       #(java.util.UUID/fromString %))
+      (update ::recipient-ids   #(mapv (fn [x] (java.util.UUID/fromString x)) %))
+      (update ::destination-ids #(mapv (fn [x] (java.util.UUID/fromString x)) %))
+      (update ::created-at      #((comp db-time parse-iso-time) %))))
+
+(defn db->clj
+  [payload]
+  (when payload
+    (-> (reduce-kv (fn [a k v] (assoc a (keyword (namespace ::_) (name k)) v)) {} payload)
+        (update ::request-id      str)
+        (update ::requester-id    str)
+        (update ::schema-id       str)
+        (update ::recipient-ids   (partial mapv str))
+        (update ::destination-ids (partial mapv str))
+        (update ::created-at      unparse-iso-time))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -69,7 +108,8 @@
   (log/info "Got RTS created event" payload)
   (let [{:keys [kixi.data-acquisition.request-to-share/requester-id
                 kixi.data-acquisition.request-to-share/schema-id]} payload]
-    (db/insert! db request-to-share-table payload)))
+    (run!
+     #(db/insert! db % (clj->db payload)) request-to-share-tables)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Registers
@@ -97,11 +137,15 @@
 (defrecord RequestToShare [comms db]
   IRequestToShare
   (fetch-by-id [this id]
-    (not-empty
-     (db/select-where db :request-to-share nil {:kixi.data-acquisition.request-to-share/request-id id})))
+    (map db->clj
+         (-> db
+             (db/select-where :data-requests nil {:kixi.data-acquisition.request-to-share/request-id id})
+             (not-empty))))
   (fetch-by-requester [this id]
-    (not-empty
-     (db/select-where db :request-to-share nil {:kixi.data-acquisition.request-to-share/requester-id id})))
+    (map db->clj
+         (-> db
+             (db/select-where :data-requests-by-requester nil {:kixi.data-acquisition.request-to-share/requester-id id})
+             (not-empty))))
   component/Lifecycle
   (start [{:keys [db] :as component}]
     (log/info "Starting Request-to-Share component")

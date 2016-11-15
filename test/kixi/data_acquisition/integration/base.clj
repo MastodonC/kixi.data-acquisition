@@ -1,6 +1,10 @@
 (ns kixi.data-acquisition.integration.base
   (:require [user :as repl]))
 
+(defn uuid
+  ([] (str (java.util.UUID/randomUUID)))
+  ([uuid] (java.util.UUID/fromString uuid)))
+
 (defn cycle-system-fixture
   [a all-tests]
   (reset! a (repl/go))

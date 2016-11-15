@@ -23,6 +23,8 @@
           nil)
         (throw (Exception. (str "Row doesn't contain index: " (:index t)))))
       (throw (Exception. (str "Couldn't find table: " table)))))
+  (insert! [this table row args]
+    (insert! this table row nil))
   (select [this table what]
     (if what
       (mapv #(select-keys % what) (get-in @(:data this) [table :rows]))
@@ -30,12 +32,14 @@
   (select-where [this table what where]
     (let [r (select this table what)]
       (vec (reduce (fn [a [k v]] (filter #(= (get % k) v) a)) r where))))
+  (update! [this table what where]
+    (throw (java.lang.UnsupportedOperationException.)))
   component/Lifecycle
   (start [component]
     (log/info "Starting Database - In Memory")
     ;; THIS IS USUALLY DONE BY MIGRATIONS
     (let [new-component (assoc component :data (atom {}))]
-      (db/create-table! new-component rts/request-to-share-table)
+      (run! (partial db/create-table! new-component) rts/request-to-share-tables)
       new-component))
   (stop [component]
     (log/info "Stopping Database - In Memory")

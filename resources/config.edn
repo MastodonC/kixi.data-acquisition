@@ -28,7 +28,15 @@
        :ns-blacklist #profile {:production []
                                :development ["org.apache.zookeeper"
                                              "org.apache.kafka.common.metrics"]}}
- :db {:inmemory {}}
+ :db {:cassandra {:hosts #profile {:development ["localhost"]
+                                   :production ["node-0.cassandra.mesos"
+                                                "node-1.cassandra.mesos"
+                                                "node-2.cassandra.mesos"]}
+                  :keyspace "data_acquisition"
+                  :replication-strategy #profile {:development {:class "SimpleStrategy"
+                                                                :replication_factor 1}
+                                                  :production {:class  "SimpleStrategy"
+                                                               :replication_factor 2}}}}
  :datastore {:inmemory {}}
  :comms {:host #profile {:production "???"
                          :development "localhost"}
