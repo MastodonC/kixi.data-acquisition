@@ -17,3 +17,18 @@
     (is (= java.util.UUID (type (first (::rts/recipient-ids fixed)))))
     (is (= clojure.lang.PersistentVector (type (::rts/destination-ids fixed))))
     (is (= java.util.UUID (type (first (::rts/destination-ids fixed)))))))
+
+(deftest db->clj-test
+  (let [payload {:request-id (java.util.UUID/randomUUID)
+                 :requester-id (java.util.UUID/randomUUID)
+                 :schema-id (java.util.UUID/randomUUID)
+                 :recipient-ids [(java.util.UUID/randomUUID) (java.util.UUID/randomUUID) (java.util.UUID/randomUUID)]
+                 :destination-ids [(java.util.UUID/randomUUID) (java.util.UUID/randomUUID) (java.util.UUID/randomUUID)]}
+        fixed (db->clj payload)]
+    (is (= java.lang.String (type (::rts/request-id fixed))))
+    (is (= java.lang.String (type (::rts/requester-id fixed))))
+    (is (= java.lang.String (type (::rts/schema-id fixed))))
+    (is (= clojure.lang.PersistentVector (type (::rts/recipient-ids fixed))))
+    (is (= java.lang.String (type (first (::rts/recipient-ids fixed)))))
+    (is (= clojure.lang.PersistentVector (type (::rts/destination-ids fixed))))
+    (is (= java.lang.String (type (first (::rts/destination-ids fixed)))))))
