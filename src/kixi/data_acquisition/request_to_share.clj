@@ -65,7 +65,7 @@
       (update ::schema-id       #(java.util.UUID/fromString %))
       (update ::recipient-ids   #(mapv (fn [x] (java.util.UUID/fromString x)) %))
       (update ::destination-ids #(mapv (fn [x] (java.util.UUID/fromString x)) %))
-      (update ::created-at      #((comp db-time parse-iso-time) %))))
+      (update ::created-at      (comp db-time parse-iso-time))))
 
 (defn db->clj
   [payload]
