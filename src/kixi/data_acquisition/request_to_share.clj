@@ -137,15 +137,15 @@
 (defrecord RequestToShare [comms db]
   IRequestToShare
   (fetch-by-id [this id]
-    (map db->clj
-         (-> db
-             (db/select-where :data-requests nil {:kixi.data-acquisition.request-to-share/request-id id})
-             (not-empty))))
+    (let [id' (if (uuid? id) id (java.util.UUID/fromString id))]
+      (not-empty
+       (map db->clj
+            (db/select-where db :data-requests nil {:kixi.data-acquisition.request-to-share/request-id id'})))))
   (fetch-by-requester [this id]
-    (map db->clj
-         (-> db
-             (db/select-where :data-requests-by-requester nil {:kixi.data-acquisition.request-to-share/requester-id id})
-             (not-empty))))
+    (let [id' (if (uuid? id) id (java.util.UUID/fromString id))]
+      (not-empty
+       (map db->clj
+            (db/select-where db :data-requests-by-requester nil {:kixi.data-acquisition.request-to-share/requester-id id'})))))
   component/Lifecycle
   (start [{:keys [db] :as component}]
     (log/info "Starting Request-to-Share component")

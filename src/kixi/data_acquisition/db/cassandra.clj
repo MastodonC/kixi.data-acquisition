@@ -51,6 +51,10 @@
                          (hayt/with {:replication
                                      replication-strategy}))))
 
+(defn joplin-config
+  []
+  (jrepl/load-config (io/resource "joplin.edn")))
+
 (defrecord DbCassandra [hosts keyspace replication-strategy profile]
   db/Database
   (create-table! [this table columns]
@@ -97,13 +101,12 @@
     (log/info "Keyspace:" hosts keyspace replication-strategy)
     (create-keyspace! hosts keyspace replication-strategy)
     (log/info "Keyspace created")
-    (let [joplin-config (jrepl/load-config (io/resource "joplin.edn"))]
-      (log/info "About to migrate")
-      (->> profile
-           (migrate joplin-config)
-           (with-out-str)
-           (clojure.string/split-lines)
-           (run! #(log/info "> JOPLIN:" %))))
+    (log/info "About to migrate")
+    (->> profile
+         (migrate (joplin-config))
+         (with-out-str)
+         (clojure.string/split-lines)
+         (run! #(log/info "> JOPLIN:" %)))
     (log/info "Migrated")
     (log/info ";; Starting session")
     (assoc component
